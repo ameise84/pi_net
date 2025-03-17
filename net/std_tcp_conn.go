@@ -56,12 +56,12 @@ type stdTcpConn struct {
 	recvSize    atomic.Uint64
 }
 
-func (c *stdTcpConn) OnPanic(err error) {
-	_gLogger.Error(err)
+func (c *stdTcpConn) LogFmt() string {
+	return fmt.Sprintf("net conn[<%s> <%s>][%v %d]", c.LocalAddr(), c.RemoteAddr(), c.tag, c.instId)
 }
 
-func (c *stdTcpConn) logFmt(msg string) string {
-	return fmt.Sprintf("net conn[<%s> <%s>][%v %d]%s", c.LocalAddr(), c.RemoteAddr(), c.tag, c.instId, msg)
+func (c *stdTcpConn) OnPanic(err error) {
+	_gLogger.ErrorBeans([]logger.Bean{c}, err)
 }
 
 func (c *stdTcpConn) ID() uint64 {
@@ -166,7 +166,7 @@ func (c *stdTcpConn) CloseAndWaitRecv() error {
 }
 
 func (c *stdTcpConn) TrafficData() string {
-	return c.logFmt(fmt.Sprintf("{send:{count:%v,size:%v},recv:{count:%v,size:%v}}", c.sendCount.Load(), c.sendSize.Load(), c.recvCount.Load(), c.recvSize.Load()))
+	return fmt.Sprintf("%s%s", c.LogFmt(), fmt.Sprintf("{send:{count:%v,size:%v},recv:{count:%v,size:%v}}", c.sendCount.Load(), c.sendSize.Load(), c.recvCount.Load(), c.recvSize.Load()))
 }
 
 func (c *stdTcpConn) loopRead(...any) {
@@ -199,9 +199,9 @@ func (c *stdTcpConn) loopRead(...any) {
 	}
 
 	if isCaredError(err) { //排除正常关闭
-		_gLogger.Error(errors.WrapNoStack(err, "handle recv"))
+		_gLogger.ErrorBeans([]logger.Bean{c}, errors.WrapNoStack(err, "handle recv"))
 	} else if rdBuffer.GetDataSize() != 0 {
-		_gLogger.Error(errors.NewOrWrapNoStack(err, "handle recv data!=0"))
+		_gLogger.ErrorBeans([]logger.Bean{c}, errors.NewOrWrapNoStack(err, "handle recv data!=0"))
 	}
 	_ = c.Close()
 }
@@ -277,7 +277,7 @@ func (c *stdTcpConn) doSendAsync(args ...any) {
 	msg, _, _ := bf.Fetch()
 	err := c.doSend(msg)
 	if err != nil {
-		_gLogger.Warn(c.logFmt(errors.WrapNoStack(err, fmt.Sprintf("do send:%v", msg)).Error()))
+		_gLogger.WarnBeans([]logger.Bean{c}, errors.WrapNoStack(err, fmt.Sprintf("do send:%v", msg)).Error())
 	}
 }
 

@@ -1,7 +1,7 @@
 package net
 
 import (
-	"errors"
+	"github.com/ameise84/pi_common/errors"
 	"github.com/ameise84/pi_common/str_conv"
 	"io"
 	"net"
@@ -101,7 +101,7 @@ func GetInternalIP() string {
 		var err error
 		_gInnerIp, err = getInternalIP()
 		if err != nil {
-			_gLogger.Fatal(err)
+			_gLogger.Fatal(errors.WrapWithStack(err, "get internal ip error"))
 		}
 	})
 	return _gInnerIp

@@ -1,7 +1,9 @@
 package net
 
 import (
+	"fmt"
 	"github.com/ameise84/go_pool"
+	"github.com/ameise84/logger"
 	"github.com/ameise84/pi_common/common"
 	"github.com/libp2p/go-reuseport"
 	"net"
@@ -68,12 +70,12 @@ type stdTcpAcceptor struct {
 	connMap   sync.Map
 }
 
-func (a *stdTcpAcceptor) OnPanic(err error) {
-	_gLogger.Error(err)
+func (a *stdTcpAcceptor) LogFmt() string {
+	return fmt.Sprintf("std net acceptor[%v]", a.tag)
 }
 
-func (a *stdTcpAcceptor) where() string {
-	return "std tcp acceptor " + a.tag
+func (a *stdTcpAcceptor) OnPanic(err error) {
+	_gLogger.ErrorBeans([]logger.Bean{a}, err)
 }
 
 func (a *stdTcpAcceptor) start() error {

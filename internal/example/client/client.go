@@ -27,6 +27,7 @@ func main() {
 	cc, err := c.ConnectSync("2", &CliContext{}, ":12345")
 	if err != nil {
 		logger.Error(err)
+		return
 	}
 	_ = cc.SendSync([]byte("123"))
 	sys.WaitKillSigint()

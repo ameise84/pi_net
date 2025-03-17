@@ -3,9 +3,8 @@ package net
 import (
 	"errors"
 	"github.com/ameise84/go_pool"
+	"github.com/ameise84/logger"
 	"github.com/ameise84/pi_common/common"
-	"github.com/ameise84/pi_net/compress"
-	"github.com/ameise84/pi_net/crypto"
 	"github.com/ameise84/pi_net/net/helper"
 	"net"
 	"sync"
@@ -28,17 +27,19 @@ func newStdTcpAgent(hand TcpAgentHandler, opts TcpAgentOptions) (*tcpAgent, erro
 
 type tcpAgent struct {
 	common.Service
-	hand       TcpAgentHandler
-	opts       TcpAgentOptions
-	cryptos    crypto.Cryptos
-	compressor compress.Compressor
-	connPool   *stdTcpConnPool
-	connMap    sync.Map
-	goRunner   go_pool.GoRunner
+	hand     TcpAgentHandler
+	opts     TcpAgentOptions
+	connPool *stdTcpConnPool
+	connMap  sync.Map
+	goRunner go_pool.GoRunner
+}
+
+func (s *tcpAgent) LogFmt() string {
+	return "net tcp agent"
 }
 
 func (s *tcpAgent) OnPanic(err error) {
-	_gLogger.Error(err)
+	_gLogger.ErrorBeans([]logger.Bean{s}, err)
 }
 
 func (s *tcpAgent) Start() error {
