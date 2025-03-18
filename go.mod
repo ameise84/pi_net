@@ -7,11 +7,10 @@ toolchain go1.23.6
 require (
 	github.com/ameise84/go_pool v1.0.1
 	github.com/ameise84/lock v1.0.1
-	github.com/ameise84/logger v1.0.2
-	github.com/ameise84/pi_common v1.0.2
+	github.com/ameise84/logger v1.1.0
+	github.com/ameise84/pi_common v1.1.0
 	github.com/ameise84/queue v1.0.0
 	github.com/libp2p/go-reuseport v0.4.0
-	github.com/pierrec/lz4/v4 v4.1.22
 	golang.org/x/sys v0.31.0
 )
 

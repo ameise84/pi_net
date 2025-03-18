@@ -3,7 +3,6 @@ package net
 import (
 	"errors"
 	"github.com/ameise84/go_pool"
-	"github.com/ameise84/logger"
 	"github.com/ameise84/pi_common/common"
 	"github.com/ameise84/pi_net/net/helper"
 	"net"
@@ -39,7 +38,7 @@ func (s *tcpAgent) LogFmt() string {
 }
 
 func (s *tcpAgent) OnPanic(err error) {
-	_gLogger.ErrorBeans([]logger.Bean{s}, err)
+	_gLogger.ErrorBean(s, err)
 }
 
 func (s *tcpAgent) Start() error {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ameise84/go_pool"
 	"github.com/ameise84/lock"
-	"github.com/ameise84/logger"
 	"github.com/ameise84/pi_common/bytes_buffer"
 	"github.com/ameise84/pi_common/errors"
 	"github.com/ameise84/pi_net/net/packet"
@@ -61,7 +60,7 @@ func (c *stdTcpConn) LogFmt() string {
 }
 
 func (c *stdTcpConn) OnPanic(err error) {
-	_gLogger.ErrorBeans([]logger.Bean{c}, err)
+	_gLogger.ErrorBean(c, err)
 }
 
 func (c *stdTcpConn) ID() uint64 {
@@ -149,7 +148,7 @@ func (c *stdTcpConn) Close() (err error) {
 			//启动一个临时协程来等待conn完全退出
 			go_pool.NewGoFuncDo(c, "tcp conn close", func() {
 				c.recvWorker.Wait() //
-				logger.TracePrintf("%v close", c.TrafficData())
+				_gLogger.TraceBeanPrintf(c, "close %v", c.TrafficData())
 				c.factory.handleCloseConn(c)
 			})
 		}
@@ -166,7 +165,7 @@ func (c *stdTcpConn) CloseAndWaitRecv() error {
 }
 
 func (c *stdTcpConn) TrafficData() string {
-	return fmt.Sprintf("%s%s", c.LogFmt(), fmt.Sprintf("{send:{count:%v,size:%v},recv:{count:%v,size:%v}}", c.sendCount.Load(), c.sendSize.Load(), c.recvCount.Load(), c.recvSize.Load()))
+	return fmt.Sprintf("{send:{count:%v,size:%v},recv:{count:%v,size:%v}}", c.sendCount.Load(), c.sendSize.Load(), c.recvCount.Load(), c.recvSize.Load())
 }
 
 func (c *stdTcpConn) loopRead(...any) {
@@ -199,9 +198,9 @@ func (c *stdTcpConn) loopRead(...any) {
 	}
 
 	if isCaredError(err) { //排除正常关闭
-		_gLogger.ErrorBeans([]logger.Bean{c}, errors.WrapNoStack(err, "handle recv"))
+		_gLogger.ErrorBean(c, errors.WrapNoStack(err, "handle recv"))
 	} else if rdBuffer.GetDataSize() != 0 {
-		_gLogger.ErrorBeans([]logger.Bean{c}, errors.NewOrWrapNoStack(err, "handle recv data!=0"))
+		_gLogger.ErrorBean(c, errors.NewOrWrapNoStack(err, "handle recv data!=0"))
 	}
 	_ = c.Close()
 }
@@ -277,7 +276,7 @@ func (c *stdTcpConn) doSendAsync(args ...any) {
 	msg, _, _ := bf.Fetch()
 	err := c.doSend(msg)
 	if err != nil {
-		_gLogger.WarnBeans([]logger.Bean{c}, errors.WrapNoStack(err, fmt.Sprintf("do send:%v", msg)).Error())
+		_gLogger.WarnBean(c, errors.WrapNoStack(err, fmt.Sprintf("do send:%v", msg)).Error())
 	}
 }
 
